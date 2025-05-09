@@ -1,0 +1,100 @@
+---
+services:
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Africa/Blantyre
+    volumes:
+      - ./config/sonarr:/config
+      - /mnt/media/tv:/tv
+      - /mnt/media/downloads:/downloads
+    ports:
+      - 8989:8989
+    restart: no
+    networks:
+      media_nw:
+        ipv4_address: 172.20.0.10
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Africa/Blantyre
+    volumes:
+      - ./config/radarr:/config
+      - /mnt/media/movies:/movies
+      - /mnt/media/downloads:/downloads
+    ports:
+      - 7878:7878
+    restart: no
+    networks:
+      media_nw:
+        ipv4_address: 172.20.0.20
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qb
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Africa/Blantyre
+      - WEBUI_PORT=8080
+      - TORRENTING_PORT=6881
+    volumes:
+      - ./config/qbittorrent:/config
+      - /mnt/media/downloads:/downloads
+    ports:
+      - 8080:8080
+      - 6881:6881
+      - 6881:6881/udp
+    restart: no
+    networks:
+      media_nw:
+        ipv4_address: 172.20.0.30
+
+  jackett:
+    container_name: jackett
+    image: linuxserver/jackett:latest
+    restart: no
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Africa/Blantyre
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /mnt/media/downloads:/downloads
+      - ./config/jackett:/config
+    ports:
+      - 9117:9117
+    networks:
+      media_nw:
+        ipv4_address: 172.20.0.40
+
+  filebrowser:
+    image: hurlenko/filebrowser
+    container_name: file
+    ports:
+      - 443:8080
+    volumes:
+      - /mnt:/data
+      - ./config/file:/config
+    environment:
+      - FB_BASEURL=/filebrowser
+      - PUID=1000
+      - PGID=1000
+    restart: no
+    networks:
+      media_nw:
+        ipv4_address: 172.20.0.45
+
+networks:
+  media_nw:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
