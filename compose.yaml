@@ -1,5 +1,23 @@
 ---
 services:
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Africa/Blantyre
+    volumes:
+      - ./config/jellyfin:/config
+      - /mnt/media/tv:/tv
+      - /mnt/media/movies:/movies
+    ports:
+      - 8096:8096
+      - 8920:8920 #optional
+      - 7359:7359/udp #optional
+      - 1900:1900/udp #optional
+    restart: unless-stopped
+
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
@@ -13,10 +31,10 @@ services:
       - /mnt/media/downloads:/downloads
     ports:
       - 8989:8989
-    restart: no
     networks:
       media_nw:
         ipv4_address: 172.20.0.10
+    restart: unless-stopped
 
   radarr:
     image: lscr.io/linuxserver/radarr:latest
@@ -31,10 +49,10 @@ services:
       - /mnt/media/downloads:/downloads
     ports:
       - 7878:7878
-    restart: no
     networks:
       media_nw:
         ipv4_address: 172.20.0.20
+    restart: unless-stopped
 
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
@@ -52,15 +70,14 @@ services:
       - 8080:8080
       - 6881:6881
       - 6881:6881/udp
-    restart: no
     networks:
       media_nw:
         ipv4_address: 172.20.0.30
+    restart: unless-stopped
 
   jackett:
     container_name: jackett
     image: linuxserver/jackett:latest
-    restart: no
     environment:
       - PUID=1000
       - PGID=1000
@@ -74,6 +91,7 @@ services:
     networks:
       media_nw:
         ipv4_address: 172.20.0.40
+    restart: unless-stopped
 
   filebrowser:
     image: hurlenko/filebrowser
@@ -87,10 +105,10 @@ services:
       - FB_BASEURL=/filebrowser
       - PUID=1000
       - PGID=1000
-    restart: no
     networks:
       media_nw:
         ipv4_address: 172.20.0.45
+    restart: unless-stopped
 
 networks:
   media_nw:
